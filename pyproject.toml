@@ -1,0 +1,11 @@
+[buil-systems]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "webScraping"
+version = "1.0.1"
+dependencies = [
+    "beautifulsoup4",
+    "requests",
+]
