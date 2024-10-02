@@ -88,11 +88,13 @@ def idd_get_json(data, template):
             item_container = json_data["hiringOrganization"]
             template["companyInfos"]["name"] = item_container.get("name")
 
-        homeOffice, employmentType = idd_get_missing_data(data)
+        homeOffice_text, employmentType_text = idd_get_missing_data(data)
 
         data_head = {
-            "homeOffice": True if "homeoffice" in homeOffice.text.lower() else False,
-            "employmentType": employmentType.text if employmentType else "",
+            "homeOffice": "homeoffice" in homeOffice_text.lower()
+            if homeOffice_text
+            else False,
+            "employmentType": employmentType_text or "",
         }
 
         template.update(data_head)
@@ -104,12 +106,21 @@ def idd_get_json(data, template):
 
 
 def idd_get_missing_data(data):
-    homeOffice = data.select_one(
-        "[data-testid='inlineHeader-companyName']"
-    ).parent.find_next_sibling()
+    homeOffice = data.select_one("[data-testid*='inlineHeader-companyName']")
+
+    if not homeOffice:
+        homeOffice = data.select_one(
+            "[data-testid='jobsearch-JobInfoHeader-companyLocation']"
+        )
+    else:
+        homeOffice = homeOffice.parent.find_next_sibling()
+
     employmentType = data.select_one("[id='salaryInfoAndJobType']")
 
-    return homeOffice, employmentType
+    homeOffice_text = homeOffice.text if homeOffice else ""
+    employmentType_text = employmentType.text if employmentType else ""
+
+    return homeOffice_text, employmentType_text
 
 
 def idd_get_data_without_json(data, template):
